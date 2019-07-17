@@ -59,7 +59,6 @@ void print_all_address(const u_char* packet)
 
     // Ethernet structure initialization & Print MAC address
     eth_header = const_cast<eth_hdr*>(reinterpret_cast<const eth_hdr*>(packet));
-    memcpy(eth_header, packet, sizeof(eth_hdr));
     print_mac("  Src MAC : ", eth_header->src_mac);
     print_mac("  Dsr MAC : ", eth_header->dst_mac);
     packet += sizeof(eth_hdr);
@@ -78,8 +77,7 @@ void print_all_address(const u_char* packet)
         tcp_payload_len = ntohs(ip_headr->total_len) - ip_headr->ihl * 4;
         break;
     case 0x86DD:
-        ip6_header = reinterpret_cast<ip6_hdr*>(malloc(sizeof(ip6_hdr)));
-        memcpy(ip6_header, packet, sizeof(ip6_hdr));
+        ip6_header = const_cast<ip6_hdr*>(reinterpret_cast<const ip6_hdr*>(packet));
         packet += sizeof(ip6_hdr);
         print_ipv6("    Src IPv6 Address : ", ip6_header->src_addr);
         print_ipv6("    Dst IPv6 Address : ", ip6_header->dst_addr);
@@ -101,18 +99,16 @@ void print_all_address(const u_char* packet)
         print_port("      Dst TCP Port : ",tcp_header->dst_port);
         packet += tcp_header->HL * 4;
         tcp_payload_len -= tcp_header->HL * 4;
-        if (ntohs(tcp_header->src_port) == 80 || ntohs(tcp_header->dst_port) == 80)
-            if(tcp_payload_len > 10)
-            {
-                printf("        TCP Payload : ");
-                for(int i=0; i<10 && i < tcp_payload_len; i++)
-                    printf("%x", packet[i]);
-                printf("\n");
-            }
+        if(tcp_payload_len > 10)
+        {
+            printf("        TCP Payload : ");
+            for(int i=0; i<10 && i < tcp_payload_len; i++)
+                printf("%02X ", packet[i]);
+            printf("\n");
+        }
         break;
     case 0x11:
         udp_header = const_cast<udp_hdr*>(reinterpret_cast<const udp_hdr*>(packet));
-        memcpy(udp_header, packet, sizeof(udp_hdr));
         print_port("      Src UDP Port : ",udp_header->src_port);
         print_port("      Dst UDP Port : ",udp_header->dst_port);
         break;

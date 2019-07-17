@@ -16,7 +16,6 @@ int main(int argc, char* argv[]) {
   int seq = 1;
   char* dev = argv[1];
   char errbuf[PCAP_ERRBUF_SIZE];
-  //pcap_t* handle = pcap_open_offline("/root/BoB/pcap/packet_sample.pcapng", errbuf); //For offline test
   pcap_t* handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
   if (handle == NULL) {
     fprintf(stderr, "couldn't open device %s: %s\n", dev, errbuf);
@@ -31,8 +30,7 @@ int main(int argc, char* argv[]) {
     if (res == -1 || res == -2) break;
 
     // Additional Functions
-
-    printf("No.%d\t", seq++);
+    printf("\nNo.%d\t", seq++);
     print_time(header);
     print_all_address(packet);
   }
