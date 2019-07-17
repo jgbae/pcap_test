@@ -66,6 +66,7 @@ void print_all_address(const u_char* packet)
 
 
     //Check L3 Type & IP structure initialization
+    //TCP Payload Length = IP Packet Total length - size of IP Header - size of TCP Header
     switch (ntohs(eth_header->type))
     {
     case 0x0800:
@@ -86,7 +87,7 @@ void print_all_address(const u_char* packet)
         tcp_payload_len = ntohs(ip6_header->pl_len) - sizeof(ip6_hdr);
         break;
     default:
-        printf("Unsupported L3 formats..\n");
+        printf("    Unsupported L3 formats..\n");
         break;
     }
 
@@ -103,9 +104,9 @@ void print_all_address(const u_char* packet)
         if (ntohs(tcp_header->src_port) == 80 || ntohs(tcp_header->dst_port) == 80)
             if(tcp_payload_len > 10)
             {
-                printf("        HTTP Payload : ");
+                printf("        TCP Payload : ");
                 for(int i=0; i<10 && i < tcp_payload_len; i++)
-                    printf("%c", packet[i]);
+                    printf("%x", packet[i]);
                 printf("\n");
             }
         break;
@@ -116,7 +117,7 @@ void print_all_address(const u_char* packet)
         print_port("      Dst UDP Port : ",udp_header->dst_port);
         break;
     default:
-        printf("Unsupported L4 formats..\n");
+        printf("      Unsupported L4 formats..\n");
         break;
     }
 }
