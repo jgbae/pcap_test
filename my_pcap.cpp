@@ -50,27 +50,25 @@ void print_all_address(const u_char* packet)
     uint8_t L4_type = 0;
     uint16_t tcp_payload_len = 0;
 
-
     // Ethernet structure initialization & Print MAC address
     eth_header = const_cast<eth_hdr*>(reinterpret_cast<const eth_hdr*>(packet));
     print_mac("  Src MAC : ", eth_header->src_mac);
     print_mac("  Dsr MAC : ", eth_header->dst_mac);
     packet += sizeof(eth_hdr);
 
-
     //Check L3 Type & IP structure initialization
     //TCP Payload Length = IP Packet Total length - size of IP Header - size of TCP Header
     switch (ntohs(eth_header->type))
     {
-    case 0x0800:
+    case IPv4:
         ip_headr = const_cast<ip_hdr*>(reinterpret_cast<const ip_hdr*>(packet));
-        packet += ip_headr->ihl * 4;
+        packet += ip_headr->ihl * IP_PACKET_WORD;
         print_ipv4("    Src IPv4 Address : ", ip_headr->src_addr);
         print_ipv4("    Dst IPv4 Address : ", ip_headr->dst_addr);
         L4_type = ip_headr->protocol;
-        tcp_payload_len = ntohs(ip_headr->total_len) - ip_headr->ihl * 4;
+        tcp_payload_len = ntohs(ip_headr->total_len) - ip_headr->ihl * IP_PACKET_WORD;
         break;
-    case 0x86DD:    //IPv6, But Extended headers are 'not' considered.
+    case IPv6:    //IPv6, But Extended headers are 'not' considered.
         ip6_header = const_cast<ip6_hdr*>(reinterpret_cast<const ip6_hdr*>(packet));
         packet += sizeof(ip6_hdr);
         print_ipv6("    Src IPv6 Address : ", ip6_header->src_addr);
@@ -83,16 +81,15 @@ void print_all_address(const u_char* packet)
         break;
     }
 
-
     //Check L4 Type & TCP/UDP structure initialization
     switch(L4_type)
     {
-    case 0x06:
+    case TCP:
         tcp_header = const_cast<tcp_hdr*>(reinterpret_cast<const tcp_hdr*>(packet));
         print_port("      Src TCP Port : ",tcp_header->src_port);
         print_port("      Dst TCP Port : ",tcp_header->dst_port);
-        packet += tcp_header->HL * 4;
-        tcp_payload_len -= tcp_header->HL * 4;
+        packet += tcp_header->HL * TCP_PACKET_WORD;
+        tcp_payload_len -= tcp_header->HL * TCP_PACKET_WORD;
         if(tcp_payload_len > 0)
         {
             printf("        TCP Payload : ");
@@ -101,7 +98,7 @@ void print_all_address(const u_char* packet)
             printf("\n");
         }
         break;
-    case 0x11:
+    case UDP:
         udp_header = const_cast<udp_hdr*>(reinterpret_cast<const udp_hdr*>(packet));
         print_port("      Src UDP Port : ",udp_header->src_port);
         print_port("      Dst UDP Port : ",udp_header->dst_port);

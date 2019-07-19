@@ -5,6 +5,13 @@
 #include <string.h>
 #include <arpa/inet.h>
 
+#define IPv4 0x0800
+#define IPv6 0x86DD
+#define TCP 0x06
+#define UDP 0x11
+#define IP_PACKET_WORD 4
+#define TCP_PACKET_WORD 4
+
 typedef struct _eth_hdr
 {
     uint8_t dst_mac[6];
