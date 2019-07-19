@@ -23,8 +23,8 @@ typedef struct _ip_hdr
     uint8_t ttl;
     uint8_t protocol;
     uint16_t checksum;
-    uint32_t src_addr;
-    uint32_t dst_addr;
+    uint8_t src_addr[4];
+    uint8_t dst_addr[4];
 }ip_hdr, *pip_hdr;
 
 typedef struct _ip6_hdr
@@ -61,10 +61,7 @@ typedef struct _udp_hdr
 
 void print_time(pcap_pkthdr* header);
 void print_mac(const char* msg, unsigned char* mac);
-void print_ipv4(const char* msg, uint32_t ip);
+void print_ipv4(const char* msg, uint8_t* ip);
 void print_ipv6(const char* msg, struct in6_addr ipv6);
 void print_port(const char *msg, uint16_t port);
-void print_all_address(const u_char* packet);
-
-void print_time(pcap_pkthdr* header);
 void print_all_address(const u_char* packet);

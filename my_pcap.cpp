@@ -13,15 +13,9 @@ void print_mac(const char* msg, unsigned char* mac)
     printf("%s%02X:%02X:%02X:%02X:%02X:%02X\n", msg, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
 
-void print_ipv4(const char* msg, uint32_t ip)
+void print_ipv4(const char* msg, uint8_t* ip)
 {
-    uint8_t parsed_ip[4] = {0};
-    ip = ntohl(ip);
-    parsed_ip[0] = (ip >> 24) & 0xff;
-    parsed_ip[1] = (ip >> 16) & 0xff;
-    parsed_ip[2] = (ip >>  8) & 0xff;
-    parsed_ip[3] = (ip      ) & 0xff;
-    printf("%s%u.%u.%u.%u\n", msg, parsed_ip[0], parsed_ip[1], parsed_ip[2], parsed_ip[3]);
+    printf("%s%u.%u.%u.%u\n", msg, ip[0], ip[1], ip[2], ip[3]);
 }
 
 void print_ipv6(const char* msg, uint16_t* ipv6)
@@ -76,7 +70,7 @@ void print_all_address(const u_char* packet)
         L4_type = ip_headr->protocol;
         tcp_payload_len = ntohs(ip_headr->total_len) - ip_headr->ihl * 4;
         break;
-    case 0x86DD:
+    case 0x86DD:    //IPv6, But Extended headers are 'not' considered.
         ip6_header = const_cast<ip6_hdr*>(reinterpret_cast<const ip6_hdr*>(packet));
         packet += sizeof(ip6_hdr);
         print_ipv6("    Src IPv6 Address : ", ip6_header->src_addr);
@@ -99,7 +93,7 @@ void print_all_address(const u_char* packet)
         print_port("      Dst TCP Port : ",tcp_header->dst_port);
         packet += tcp_header->HL * 4;
         tcp_payload_len -= tcp_header->HL * 4;
-        if(tcp_payload_len > 10)
+        if(tcp_payload_len > 0)
         {
             printf("        TCP Payload : ");
             for(int i=0; i<10 && i < tcp_payload_len; i++)
